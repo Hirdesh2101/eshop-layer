@@ -40,192 +40,194 @@ class AppRouter {
     refreshListenable: appService,
     initialLocation: '/',
     routes: [
-      ShellRoute(
-        // navigatorKey: _shellNavigatorKey,
-        builder: (context, state, child) {
-          // Conditionally wrap the child with BottomBar only for specific routes
-          var includeBottomBar = ['/', '/category', '/cart', '/account']
-              .contains(state.uri.path);
-          return includeBottomBar ? BottomBar(child: child) : child;
-        },
-        routes: <RouteBase>[
-          GoRoute(
-              path: '/',
-              // parentNavigatorKey: _shellNavigatorKey,
-              builder: (BuildContext context, GoRouterState state) {
-                return const HomeScreen();
+      GoRoute(
+          path: '/',
+          // parentNavigatorKey: _shellNavigatorKey,
+          builder: (BuildContext context, GoRouterState state) {
+            return const HomeScreen();
+          },
+          routes: [
+            GoRoute(
+              path: 'search',
+              builder: (context, state) {
+                final query = state.uri.queryParameters['query'];
+                if (query != null) {
+                  return SearchScreen(searchQuery: query);
+                } else {
+                  return const MySearchScreen();
+                }
               },
-              routes: [
-                GoRoute(
-                  path: 'search',
-                  builder: (context, state) {
-                    final query = state.uri.queryParameters['query'];
-                    if (query != null) {
-                      return SearchScreen(searchQuery: query);
-                    } else {
-                      return const MySearchScreen();
-                    }
-                  },
-                ),
-                GoRoute(
-                  path: 'product/:id',
-                  builder: (context, state) => ProductDetailScreen(
-                    productId: state.pathParameters['id']!,
-                  ),
-                ),
-              ]),
-          GoRoute(
-              path: '/category',
-              // parentNavigatorKey: _shellNavigatorKey,
-              builder: (BuildContext context, GoRouterState state) {
-                return const CategoryGridScreen();
+            ),
+            GoRoute(
+              path: 'product/:id',
+              builder: (context, state) => ProductDetailScreen(
+                productId: state.pathParameters['id']!,
+              ),
+            ),
+          ]),
+      GoRoute(
+          path: '/cart',
+          // parentNavigatorKey: _shellNavigatorKey,
+          builder: (BuildContext context, GoRouterState state) {
+            return const CartScreen();
+          },
+          routes: [
+            GoRoute(
+              path: 'search',
+              builder: (context, state) {
+                final query = state.uri.queryParameters['query'];
+                if (query != null) {
+                  return SearchScreen(searchQuery: query);
+                } else {
+                  return const MySearchScreen();
+                }
               },
-              routes: [
-                GoRoute(
-                  path: 'search',
-                  builder: (context, state) {
-                    final query = state.uri.queryParameters['query'];
-                    if (query != null) {
-                      return SearchScreen(searchQuery: query);
-                    } else {
-                      return const MySearchScreen();
-                    }
-                  },
-                ),
-                GoRoute(
-                    path: ':category',
-                    builder: (context, state) => CategoryDealsScreen(
-                          category: state.pathParameters['category']!,
-                        ),
-                    routes: [
-                      GoRoute(
-                        path: 'search',
-                        builder: (context, state) {
-                          final query = state.uri.queryParameters['query'];
-                          if (query != null) {
-                            return SearchScreen(searchQuery: query);
-                          } else {
-                            return const MySearchScreen();
-                          }
-                        },
-                      ),
-                      GoRoute(
-                        path: 'filter',
-                        builder: (context, state) => const FilterScreen(),
-                      ),
-                    ]),
-              ]),
-          GoRoute(
-              path: '/cart',
-              // parentNavigatorKey: _shellNavigatorKey,
-              builder: (BuildContext context, GoRouterState state) {
-                return const CartScreen();
+            ),
+            GoRoute(
+              path: 'checkout',
+              builder: (context, state) {
+                var extras = state.extra! as List;
+                var totalAmount = extras[0];
+                var cart = extras[1];
+                var userProviderCart = extras[2];
+                return CheckoutScreen(
+                  totalAmount: totalAmount,
+                  mycart: cart,
+                  userProviderCart: userProviderCart,
+                );
               },
-              routes: [
-                GoRoute(
-                  path: 'search',
-                  builder: (context, state) {
-                    final query = state.uri.queryParameters['query'];
-                    if (query != null) {
-                      return SearchScreen(searchQuery: query);
-                    } else {
-                      return const MySearchScreen();
-                    }
-                  },
-                ),
-                GoRoute(
-                  path: 'checkout',
-                  builder: (context, state) {
-                    var extras = state.extra! as List;
-                    var totalAmount = extras[0];
-                    var cart = extras[1];
-                    var userProviderCart = extras[2];
-                    return CheckoutScreen(
-                      totalAmount: totalAmount,
-                      mycart: cart,
-                      userProviderCart: userProviderCart,
-                    );
-                  },
-                ),
-              ]),
-          GoRoute(
-              path: '/account',
-              // parentNavigatorKey: _shellNavigatorKey,
-              builder: (BuildContext context, GoRouterState state) {
-                return const AccountScreen();
-              },
-              routes: [
-                GoRoute(
-                  path: 'profile',
-                  builder: (context, state) => const ProfileScreen(),
-                ),
-                GoRoute(
-                  path: 'search',
-                  builder: (context, state) {
-                    final query = state.uri.queryParameters['query'];
-                    if (query != null) {
-                      return SearchScreen(searchQuery: query);
-                    } else {
-                      return const MySearchScreen();
-                    }
-                  },
-                ),
-                GoRoute(
-                  path: 'wishlist',
-                  builder: (context, state) => const WishListScreen(),
-                ),
-                GoRoute(
-                    path: 'orders',
-                    builder: (context, state) {
-                      return const AllOrdersScreen();
-                    },
-                    routes: [
-                      GoRoute(
-                        path: 'returns',
-                        builder: (context, state) {
-                          var extras = state.extra! as Return;
-                          return ReturnDetailsScreen(returns: extras);
-                        },
-                      ),
-                      GoRoute(
-                        path: 'details',
-                        builder: (context, state) {
-                          var extras = state.extra as Order?;
-                          return OrderDetailsScreen(order: extras!);
-                        },
-                      ),
-                      GoRoute(
-                          path: 'newreturn',
-                          builder: (context, state) {
-                            var extras = state.extra! as List;
-                            var order = extras[0];
-                            var products = extras[1];
-                            return ReturnProductScreen(
-                                order: order, selectedProduct: products);
-                          },
-                          routes: [
-                            GoRoute(
-                                path: 'select',
-                                builder: (context, state) {
-                                  var extras = state.extra! as List;
-                                  var copy = extras[0];
-                                  var order = extras[1];
-                                  return SelectReturnProduct(
-                                      copy: copy, order: order);
-                                }),
-                          ]),
-                    ]),
-              ]),
-        ],
-      ),
+            ),
+          ]),
+      // ShellRoute(
+      //   // navigatorKey: _shellNavigatorKey,
+      //   builder: (context, state, child) {
+      //     // Conditionally wrap the child with BottomBar only for specific routes
+      //     var includeBottomBar = ['/', '/category', '/cart', '/account']
+      //         .contains(state.uri.path);
+      //     return includeBottomBar ? BottomBar(child: child) : child;
+      //   },
+      //   routes: <RouteBase>[
+
+      //     GoRoute(
+      //         path: '/category',
+      //         // parentNavigatorKey: _shellNavigatorKey,
+      //         builder: (BuildContext context, GoRouterState state) {
+      //           return const CategoryGridScreen();
+      //         },
+      //         routes: [
+      //           GoRoute(
+      //             path: 'search',
+      //             builder: (context, state) {
+      //               final query = state.uri.queryParameters['query'];
+      //               if (query != null) {
+      //                 return SearchScreen(searchQuery: query);
+      //               } else {
+      //                 return const MySearchScreen();
+      //               }
+      //             },
+      //           ),
+      //           GoRoute(
+      //               path: ':category',
+      //               builder: (context, state) => CategoryDealsScreen(
+      //                     category: state.pathParameters['category']!,
+      //                   ),
+      //               routes: [
+      //                 GoRoute(
+      //                   path: 'search',
+      //                   builder: (context, state) {
+      //                     final query = state.uri.queryParameters['query'];
+      //                     if (query != null) {
+      //                       return SearchScreen(searchQuery: query);
+      //                     } else {
+      //                       return const MySearchScreen();
+      //                     }
+      //                   },
+      //                 ),
+      //                 GoRoute(
+      //                   path: 'filter',
+      //                   builder: (context, state) => const FilterScreen(),
+      //                 ),
+      //               ]),
+      //         ]),
+
+      //     GoRoute(
+      //         path: '/account',
+      //         // parentNavigatorKey: _shellNavigatorKey,
+      //         builder: (BuildContext context, GoRouterState state) {
+      //           return const AccountScreen();
+      //         },
+      //         routes: [
+      //           GoRoute(
+      //             path: 'profile',
+      //             builder: (context, state) => const ProfileScreen(),
+      //           ),
+      //           GoRoute(
+      //             path: 'search',
+      //             builder: (context, state) {
+      //               final query = state.uri.queryParameters['query'];
+      //               if (query != null) {
+      //                 return SearchScreen(searchQuery: query);
+      //               } else {
+      //                 return const MySearchScreen();
+      //               }
+      //             },
+      //           ),
+      //           GoRoute(
+      //             path: 'wishlist',
+      //             builder: (context, state) => const WishListScreen(),
+      //           ),
+      //           GoRoute(
+      //               path: 'orders',
+      //               builder: (context, state) {
+      //                 return const AllOrdersScreen();
+      //               },
+      //               routes: [
+      //                 GoRoute(
+      //                   path: 'returns',
+      //                   builder: (context, state) {
+      //                     var extras = state.extra! as Return;
+      //                     return ReturnDetailsScreen(returns: extras);
+      //                   },
+      //                 ),
+      //                 GoRoute(
+      //                   path: 'details',
+      //                   builder: (context, state) {
+      //                     var extras = state.extra as Order?;
+      //                     return OrderDetailsScreen(order: extras!);
+      //                   },
+      //                 ),
+      //                 GoRoute(
+      //                     path: 'newreturn',
+      //                     builder: (context, state) {
+      //                       var extras = state.extra! as List;
+      //                       var order = extras[0];
+      //                       var products = extras[1];
+      //                       return ReturnProductScreen(
+      //                           order: order, selectedProduct: products);
+      //                     },
+      //                     routes: [
+      //                       GoRoute(
+      //                           path: 'select',
+      //                           builder: (context, state) {
+      //                             var extras = state.extra! as List;
+      //                             var copy = extras[0];
+      //                             var order = extras[1];
+      //                             return SelectReturnProduct(
+      //                                 copy: copy, order: order);
+      //                           }),
+      //                     ]),
+      //               ]),
+      //         ]),
+      //   ],
+      // ),
       // GoRoute(
       //   path: '/onboarding',
       //   builder: (context, state) => const SplashScreen(),
       // ),
-      GoRoute(
-        path: '/splash',
-        builder: (context, state) => const LoadingSplashScreen(),
-      ),
+      // GoRoute(
+      //   path: '/splash',
+      //   builder: (context, state) => const LoadingSplashScreen(),
+      // ),
       // GoRoute(
       //   path: '/auth',
       //   builder: (context, state) => const AuthScreen(),
