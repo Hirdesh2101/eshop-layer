@@ -36,9 +36,4 @@ class UserProvider extends ChangeNotifier {
     _user = user;
     notifyListeners();
   }
-
-  // void addToHistory(String searchQuery) {
-  //   _user.searchHistory!.add(searchQuery.trim());
-  //   notifyListeners();
-  // }
 }

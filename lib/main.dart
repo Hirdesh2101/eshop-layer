@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:ecommerce_major_project/app_service.dart';
+import 'package:ecommerce_major_project/central_navigator/central_navigator.dart';
 import 'package:ecommerce_major_project/features/cart/providers/cart_provider.dart';
 import 'package:ecommerce_major_project/features/home/providers/ads_provider.dart';
 import 'package:ecommerce_major_project/features/home/providers/category_provider.dart';
@@ -18,7 +19,6 @@ import 'package:ecommerce_major_project/constants/global_variables.dart';
 import 'package:ecommerce_major_project/features/auth/services/auth_service.dart';
 import 'package:ecommerce_major_project/features/home/providers/search_provider.dart';
 import 'package:ecommerce_major_project/features/home/providers/filter_provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -67,6 +67,10 @@ class _MyAppState extends State<MyApp> {
     appService = AppService(widget.sharedPreferences);
     authService = AuthService();
     authSubscription = authService.onAuthStateChange.listen(onAuthStateChange);
+    CentralNavigator.instance.addRoutes(myRoutes);
+    CentralNavigator.instance.initialLocation = '/';
+    CentralNavigator.instance.refreshListenable = appService;
+    CentralNavigator.instance.setCommonRedirect(AppRedirect(appService));
     super.initState();
   }
 
@@ -86,7 +90,6 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AppService>(create: (_) => appService),
-        Provider<AppRouter>(create: (_) => AppRouter(appService)),
         Provider<AuthService>(create: (_) => authService),
         ChangeNotifierProvider(
           create: (context) => UserProvider(),
@@ -111,14 +114,13 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: Builder(builder: (context) {
-        final GoRouter goRouter =
-            Provider.of<AppRouter>(context, listen: false).router;
+        final router = CentralNavigator.instance.buildRouter();
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           scrollBehavior: AppScrollBehavior(),
           title: 'Ecommerce App',
           //navigatorKey: GlobalVariables.navigatorKey,
-          routerConfig: goRouter,
+          routerConfig: router,
           theme: ThemeData(
             scaffoldBackgroundColor: GlobalVariables.backgroundColor,
             fontFamily: 'Poppins',

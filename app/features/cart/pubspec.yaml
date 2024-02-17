@@ -1,0 +1,10 @@
+name: cart_feature
+description: Cart package to use the cart feature.
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  feature_resolver:
+    path: ../../infrastructure/feature_resolver
